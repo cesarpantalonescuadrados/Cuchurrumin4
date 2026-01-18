@@ -121,7 +121,7 @@
                 
                 // Auto-redirección después de 2 segundos
                 setTimeout(() => {
-                    window.location.href = 'visualizar.html';
+                    window.location.href = '/visualizar.html';
                 }, 2000);
                 
             } catch (error) {
@@ -142,4 +142,5 @@
             setTimeout(() => {
                 statusMessage.style.display = 'none';
             }, 5000);
+
         }
