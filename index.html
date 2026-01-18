@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #2b70d8 0%, #68dcff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .login-header {
+            background: linear-gradient(45deg, #4ecd54, #44a045);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .login-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .login-header h1 {
+            font-size: 2em;
+            font-weight: 600;
+        }
+        
+        .login-header p {
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .login-form {
+            padding: 40px 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4ecd54;
+            font-size: 1.1em;
+        }
+        
+        .input-with-icon input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+        }
+        
+        .show-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .login-btn {
+            background: linear-gradient(45deg, #4ecd54, #44a045);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #c3e6cb;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+        }
+        
+        .register-link a {
+            color: #4ECDC4;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                border-radius: 15px;
+            }
+            
+            .login-header {
+                padding: 30px 20px;
+            }
+            
+            .login-form {
+                padding: 30px 20px;
+            }
+            
+            .login-header h1 {
+                font-size: 1.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-lock login-icon"></i>
+            <h1>Iniciar Sesión</h1>
+            <p>Acceso a las pato aventuras</p>
+        </div>
+        
+        <div class="login-form">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Usuario
+                    </label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-key"></i> Contraseña
+                    </label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+                        <button type="button" class="show-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    <span id="errorText">Usuario o contraseña incorrectos</span>
+                </div>
+                
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i> 
+                    <span id="successText">¡Inicio de sesión exitoso!</span>
+                </div>
+            </form>
+            
+            <div class="footer">
+                <p>© 2025 CTX</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyClvGsln3Xo9Gr5wcnkU5lMdXXE3KeUXcw",
+            authDomain: "amor-f437b.firebaseapp.com",
+            projectId: "amor-f437b",
+            storageBucket: "amor-f437b.firebasestorage.app",
+            messagingSenderId: "614121584515",
+            appId: "1:614121584515:web:10acada1fd5bbe36e628b6",
+            measurementId: "G-QXKHRN9CZJ"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Elementos del DOM
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const togglePassword = document.getElementById('togglePassword');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const registerLink = document.getElementById('registerLink');
+
+        // Mostrar/ocultar contraseña
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+
+        // Manejar el envío del formulario
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!username || !password) {
+                showError('Por favor, completa todos los campos');
+                return;
+            }
+            
+            // Mostrar estado de carga
+            loginBtn.innerHTML = '<div class="loading-spinner"></div> Verificando...';
+            loginBtn.disabled = true;
+            hideMessages();
+            
+            try {
+                // Buscar en la colección "Cuenta"
+                const querySnapshot = await db.collection('Cuenta')
+                    .where('usuario', '==', username)
+                    .where('contraseña', '==', password)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    // Usuario encontrado
+                    showSuccess('¡Autenticación exitosa!');
+                    
+                    // Guardar sesión en localStorage
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    
+                    // Redirigir después de 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = 'visualizar.html';
+                    }, 1500);
+                    
+                } else {
+                    // Usuario no encontrado
+                    showError('Usuario o contraseña incorrectos');
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                    loginBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                showError('Error de conexión. Intenta nuevamente.');
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Verificar si ya está logueado (opcional, para redirigir)
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Función para mostrar mensaje de error
+        function showError(message) {
+            errorMessage.querySelector('#errorText').textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        // Función para mostrar mensaje de éxito
+        function showSuccess(message) {
+            successMessage.querySelector('#successText').textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Función para ocultar mensajes
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        // Limpiar mensajes al cambiar inputs
+        usernameInput.addEventListener('input', hideMessages);
+        passwordInput.addEventListener('input', hideMessages);
+
+        // Si quieres registrar usuarios, crea register.html
+        // Por ahora, si no existe, mostramos alerta
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('La página de registro no está disponible aún. Contacta al administrador.');
+        });
+
+        // Verificar autenticación al cargar la página
+        // Descomenta si quieres que redirija automáticamente si ya está logueado
+        // checkAuth();
+    </script>
+</body>
+</html>

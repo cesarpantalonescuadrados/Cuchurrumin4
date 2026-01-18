@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pato aventuras</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/visualizar.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-images"></i> Pato aventuras</h1>
+        <button onclick="window.location.href='subir.html'" class="btn">
+            <i class="fas fa-home"></i> subir imagen
+        </button>
+    </div>
+    
+    <div class="gallery-container">
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterPhotos('all')">Todas</button>
+            <button class="filter-btn" onclick="filterPhotos('recent')">Más Recientes</button>
+            <button class="filter-btn" onclick="filterPhotos('oldest')">Más Antiguas</button>
+        </div>
+        
+        <div class="gallery" id="gallery"></div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Cargando fotos...</p>
+        </div>
+        
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-camera empty-icon"></i>
+            <h2>No hay fotos aún</h2>
+            <p>¡Sube la primera foto a la galería!</p>
+            <button onclick="window.location.href='subir.html'" class="btn" style="margin-top: 20px;">
+                <i class="fas fa-cloud-upload-alt"></i> Subir Foto
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal para vista ampliada -->
+    <div class="modal" id="imageModal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script src="/js/visualizar.js">
+
+    </script>
+</body>
+</html>
